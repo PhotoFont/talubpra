@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
 from datetime import datetime
-import database
+from database import Base  # <-- เปลี่ยนมาอิมพอร์ต Base จาก database โดยตรง
 
-class Order(database.Base):
+class Order(Base):  # <-- ใช้ Base ตรงๆ ได้เลย
     __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True)
