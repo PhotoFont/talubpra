@@ -11,11 +11,11 @@ templates = Jinja2Templates(directory="templates")
 @app.get("/")
 def read_root(request: Request, db: Session = Depends(database.get_db)):
     orders = db.query(models.Order).order_by(models.Order.id.desc()).all()
-    return templates.TemplateResponse("index.html", {"request": request, "orders": orders})
+    return templates.TemplateResponse(request, "index.html", {"orders": orders})
 
 @app.get("/add")
 def add_order_page(request: Request):
-    return templates.TemplateResponse("add_order.html", {"request": request})
+    return templates.TemplateResponse(request, "add_order.html", {})
 
 @app.post("/add")
 def add_order(
