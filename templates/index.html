@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการร้านเลี่ยมพระ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>📜 รายการเลี่ยมพระทั้งหมด</h2>
+            <a href="/add" class="btn btn-primary">+ รับงานเลี่ยมใหม่</a>
+        </div>
+        
+        <div class="card shadow-sm">
+            <div class="card-body table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>ลูกค้า</th>
+                            <th>เบอร์โทร</th>
+                            <th>รายการพระ</th>
+                            <th>วัสดุกรอบ</th>
+                            <th>ราคา</th>
+                            <th>สถานะ</th>
+                            <th>จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>#{{ order.id }}</td>
+                            <td><strong>{{ order.customer_name }}</strong></td>
+                            <td>{{ order.phone }}</td>
+                            <td>{{ order.amulet_type }}</td>
+                            <td>{{ order.frame_material }}</td>
+                            <td>{{ "{:,.2f}".format(order.price) }} ฿</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ order.status }}</span>
+                            </td>
+                            <td>
+                                <form action="/update-status/{{ order.id }}" method="post" class="d-inline">
+                                    <select name="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+                                        <option value="รอคิวเลี่ยม" {% if order.status == 'รอคิวเลี่ยม' %}selected{% endif %}>รอคิวเลี่ยม</option>
+                                        <option value="กำลังเลี่ยม" {% if order.status == 'กำลังเลี่ยม' %}selected{% endif %}>กำลังเลี่ยม</option>
+                                        <option value="เสร็จสิ้น" {% if order.status == 'เสร็จสิ้น' %}selected{% endif %}>เสร็จสิ้น</option>
+                                        <option value="รับพระแล้ว" {% if order.status == 'รับพระแล้ว' %}selected{% endif %}>รับพระแล้ว</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">ยังไม่มีข้อมูลการรับเลี่ยมพระในระบบ</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
