@@ -93,6 +93,30 @@ def add_order(
     db.commit()
     return RedirectResponse(url="/", status_code=303)
 
+@app.get("/order/{order_id}")
+def order_detail(
+    request: Request, 
+    order_id: int, 
+    auth_token: str = Cookie(None), 
+    db: Session = Depends(database.get_db)
+):
+    if auth_token != "authenticated":
+        return RedirectResponse(url="/login", status_code=303)
+    
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        return RedirectResponse(url="/", status_code=303)
+        
+    # แปลงสตริงชื่อไฟล์คั่นด้วยคอมมา ให้กลับเป็น List สำหรับใช้วนลูปแสดงรูปใน HTML
+    before_images = order.before_image.split(",") if order.before_image else []
+    after_images = order.after_image.split(",") if order.after_image else []
+    
+    return templates.TemplateResponse(request, "order_detail.html", {
+        "order": order,
+        "before_images": before_images,
+        "after_images": after_images
+    })
+
 @app.post("/update-status/{order_id}")
 def update_status(
     order_id: int, 
