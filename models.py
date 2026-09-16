@@ -14,7 +14,7 @@ class Order(Base):
     status = Column(String, default="รอคิวเลี่ยม")  # รอคิว, กำลังเลี่ยม, เสร็จสิ้น, รับพระแล้ว
     
     # เพิ่มฟิลด์สำหรับเก็บชื่อไฟล์รูปภาพ
-    before_image = Column(String, nullable=True)  # รูปตอนรับพระก่อนเลี่ยม
-    after_image = Column(String, nullable=True)   # รูปตอนเลี่ยมเสร็จแล้ว
+    before_image = Column(String, nullable=True)  # เก็บชื่อไฟล์คั่นด้วยเครื่องหมายคอมมา (เช่น img1.jpg,img2.jpg)
+    after_image = Column(String, nullable=True)   # เก็บชื่อไฟล์คั่นด้วยคอมมาเช่นกัน
     
     created_at = Column(DateTime, default=datetime.utcnow)

@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
+from typing import List, Optional
 import shutil
 import os
 import models, database
@@ -60,21 +61,24 @@ def add_order(
     amulet_type: str = Form(...),
     frame_material: str = Form(...),
     price: float = Form(...),
-    before_image: UploadFile = File(None), # รับรูปภาพก่อนเลี่ยม
+    before_images: List[UploadFile] = File([]), # รองรับการอัปโหลดหลายรูปตอนรับงาน
     db: Session = Depends(database.get_db),
     auth_token: str = Cookie(None)
 ):
     if auth_token != "authenticated":
         return RedirectResponse(url="/login", status_code=303)
 
-    # จัดการบันทึกไฟล์รูปก่อนเลี่ยม
-    before_image_name = None
-    if before_image and before_image.filename:
-        # ป้องกันชื่อไฟล์ซ้ำด้วยการต่อ timestamp หรือใช้ชื่อเดิมตรงๆ
-        file_location = os.path.join(UPLOAD_DIR, before_image.filename)
-        with open(file_location, "wb") as buffer:
-            shutil.copyfileobj(before_image.file, buffer)
-        before_image_name = before_image.filename
+    # วนลูปบันทึกไฟล์รูปภาพทั้งหมด
+    saved_filenames = []
+    for img in before_images:
+        if img and img.filename:
+            file_location = os.path.join(UPLOAD_DIR, img.filename)
+            with open(file_location, "wb") as buffer:
+                shutil.copyfileobj(img.file, buffer)
+            saved_filenames.append(img.filename)
+
+    # รวมชื่อไฟล์ด้วยเครื่องหมายคอมมาเพื่อเก็บลง DB
+    images_string = ",".join(saved_filenames) if saved_filenames else None
 
     new_order = models.Order(
         customer_name=customer_name,
@@ -82,7 +86,7 @@ def add_order(
         amulet_type=amulet_type,
         frame_material=frame_material,
         price=price,
-        before_image=before_image_name,
+        before_image=images_string,
         status="รอคิวเลี่ยม"
     )
     db.add(new_order)
@@ -93,7 +97,7 @@ def add_order(
 def update_status(
     order_id: int, 
     status: str = Form(...), 
-    after_image: UploadFile = File(None), # รองรับการแนบรูปตอนเปลี่ยนสถานะ (เช่น เลี่ยมเสร็จ)
+    after_images: List[UploadFile] = File([]), # รองรับการอัปโหลดหลายรูปตอนงานเสร็จ
     db: Session = Depends(database.get_db),
     auth_token: str = Cookie(None)
 ):
@@ -104,12 +108,17 @@ def update_status(
     if order:
         order.status = status
         
-        # ถ้ามีการอัปโหลดรูปตอนเลี่ยมเสร็จ
-        if after_image and after_image.filename:
-            file_location = os.path.join(UPLOAD_DIR, after_image.filename)
-            with open(file_location, "wb") as buffer:
-                shutil.copyfileobj(after_image.file, buffer)
-            order.after_image = after_image.filename
+        # วนลูปบันทึกรูปภาพตอนเลี่ยมเสร็จ
+        saved_filenames = []
+        for img in after_images:
+            if img and img.filename:
+                file_location = os.path.join(UPLOAD_DIR, img.filename)
+                with open(file_location, "wb") as buffer:
+                    shutil.copyfileobj(img.file, buffer)
+                saved_filenames.append(img.filename)
+                
+        if saved_filenames:
+            order.after_image = ",".join(saved_filenames)
             
         db.commit()
     return RedirectResponse(url="/", status_code=303)
