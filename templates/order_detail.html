@@ -150,7 +150,10 @@
                                 <label for="after_images" class="form-label fw-semibold">เพิ่มรูปภาพหลังเลี่ยมเสร็จ (เลือกได้หลายรูป):</label>
                                 <input type="file" name="after_images" id="after_images" class="form-control shadow-sm" multiple accept="image/*">
                             </div>
-
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">หมายเหตุ:</label>
+                                <textarea class="form-control" name="remarks" rows="2">{{ order.remarks or '' }}</textarea>
+                            </div>    
                             <button type="submit" class="btn btn-success w-100 py-2 shadow-sm">
                                 <i class="fa-solid fa-floppy-disk me-1"></i> บันทึกการเปลี่ยนแปลง
                             </button>

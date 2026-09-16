@@ -20,6 +20,7 @@ templates = Jinja2Templates(directory="templates")
 
 UPLOAD_DIR = "static/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs("data", exist_ok=True) # ป้องกันปัญหาโฟลเดอร์ database หาย
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 ADMIN_PASSWORD = "21020166"
@@ -101,6 +102,7 @@ def add_order(
     amulet_type: str = Form(...),
     frame_material: str = Form(...),
     price: float = Form(...),
+    remarks: Optional[str] = Form(None), # รองรับรับค่าหมายเหตุตอนสร้างออเดอร์
     before_images: List[UploadFile] = File([]),
     db: Session = Depends(database.get_db),
     auth_token: str = Cookie(None)
@@ -124,6 +126,7 @@ def add_order(
         amulet_type=amulet_type,
         frame_material=frame_material,
         price=price,
+        remarks=remarks, # บันทึกหมายเหตุลงฐานข้อมูล
         before_image=images_string,
         status="รอคิวเลี่ยม"
     )
@@ -161,6 +164,7 @@ def update_status(
     order_id: int, 
     status: str = Form(...), 
     pickup_date: Optional[str] = Form(None),
+    remarks: Optional[str] = Form(None), # รองรับรับค่าหมายเหตุตอนอัปเดตสถานะ
     after_images: List[UploadFile] = File([]),
     db: Session = Depends(database.get_db),
     auth_token: str = Cookie(None)
@@ -171,6 +175,7 @@ def update_status(
     order = db.query(models.Order).filter(models.Order.id == order_id).first()
     if order:
         order.status = status
+        order.remarks = remarks # อัปเดตหมายเหตุ
         
         # จัดการบันทึกวันที่ลูกค้ารับพระกลับ
         if pickup_date:
