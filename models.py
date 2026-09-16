@@ -13,8 +13,11 @@ class Order(Base):
     price = Column(Float)
     status = Column(String, default="รอคิวเลี่ยม")  # รอคิว, กำลังเลี่ยม, เสร็จสิ้น, รับพระแล้ว
     
-    # เพิ่มฟิลด์สำหรับเก็บชื่อไฟล์รูปภาพ
-    before_image = Column(String, nullable=True)  # เก็บชื่อไฟล์คั่นด้วยเครื่องหมายคอมมา (เช่น img1.jpg,img2.jpg)
-    after_image = Column(String, nullable=True)   # เก็บชื่อไฟล์คั่นด้วยคอมมาเช่นกัน
+    # ฟิลด์สำหรับเก็บชื่อไฟล์รูปภาพ (คั่นด้วยเครื่องหมายคอมมา เช่น img1.jpg,img2.jpg)
+    before_image = Column(String, nullable=True)
+    after_image = Column(String, nullable=True)
+    
+    # เพิ่มฟิลด์สำหรับเก็บวันที่ลูกค้ารับพระกลับ
+    pickup_date = Column(DateTime, nullable=True)
     
     created_at = Column(DateTime, default=datetime.utcnow)

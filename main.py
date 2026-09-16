@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from datetime import datetime
 import shutil
 import os
 import models, database
@@ -121,6 +122,7 @@ def order_detail(
 def update_status(
     order_id: int, 
     status: str = Form(...), 
+    pickup_date: Optional[str] = Form(None), # รับค่าวันที่ลูกค้ารับพระกลับจากฟอร์ม
     after_images: List[UploadFile] = File([]), # รองรับการอัปโหลดหลายรูปตอนงานเสร็จ
     db: Session = Depends(database.get_db),
     auth_token: str = Cookie(None)
@@ -132,6 +134,16 @@ def update_status(
     if order:
         order.status = status
         
+        # จัดการบันทึกวันที่ลูกค้ารับพระกลับ (แปลงจาก String 'YYYY-MM-DD' เป็น Datetime)
+        if pickup_date:
+            try:
+                order.pickup_date = datetime.strptime(pickup_date, "%Y-%m-%d")
+            except ValueError:
+                pass
+        else:
+            # หากเคลียร์ค่าวันที่ว่างมา สามารถตั้งค่าให้เป็น None ได้
+            order.pickup_date = None
+
         # วนลูปบันทึกรูปภาพตอนเลี่ยมเสร็จ
         saved_filenames = []
         for img in after_images:
@@ -145,4 +157,6 @@ def update_status(
             order.after_image = ",".join(saved_filenames)
             
         db.commit()
-    return RedirectResponse(url="/", status_code=303)
+        
+    # เปลี่ยนเส้นทางกลับไปที่หน้ารายละเอียดออเดอร์นั้นๆ เพื่อให้เห็นผลลัพธ์ทันที
+    return RedirectResponse(url=f"/order/{order_id}", status_code=303)

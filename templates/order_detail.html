@@ -2,64 +2,175 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>รายละเอียดออเดอร์ #{{ order.id }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายละเอียดออเดอร์ #{{ order.id }} - ระบบจัดการร้านเลี่ยมพระ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-light">
-    <div class="container mt-5 mb-5">
-        <div class="card shadow p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>📋 รายละเอียดออเดอร์ #{{ order.id }}</h2>
-                <a href="/" class="btn btn-secondary">ย้อนกลับหน้าหลัก</a>
+    <div class="container py-5">
+        <!-- Back Button & Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="/" class="btn btn-outline-secondary shadow-sm">
+                <i class="fa-solid fa-arrow-left me-1"></i> กลับหน้าหลัก
+            </a>
+            <h2>📋 รายละเอียดออเดอร์ #{{ order.id }}</h2>
+            <div></div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Order Information Card -->
+            <div class="col-md-5">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-dark text-white py-3">
+                        <h5 class="mb-0"><i class="fa-solid fa-circle-info me-2"></i> ข้อมูลลูกค้าและรายการ</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between py-3">
+                                <span class="text-muted">ชื่อลูกค้า:</span>
+                                <strong class="text-dark">{{ order.customer_name }}</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between py-3">
+                                <span class="text-muted">เบอร์โทรศัพท์:</span>
+                                <span>{{ order.phone }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between py-3">
+                                <span class="text-muted">รายการพระ:</span>
+                                <span>{{ order.amulet_type }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between py-3">
+                                <span class="text-muted">วัสดุกรอบ:</span>
+                                <span><span class="badge bg-light text-dark border">{{ order.frame_material }}</span></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between py-3">
+                                <span class="text-muted">ราคาค่าบริการ:</span>
+                                <strong class="text-success fs-5">{{ "{:,.2f}".format(order.price) }} ฿</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between py-3">
+                                <span class="text-muted">สถานะปัจจุบัน:</span>
+                                <span>
+                                    {% if order.status == 'รอคิวเลี่ยม' %}
+                                        <span class="badge bg-warning text-dark px-2 py-1">รอคิวเลี่ยม</span>
+                                    {% elif order.status == 'กำลังเลี่ยม' %}
+                                        <span class="badge bg-info text-dark px-2 py-1">กำลังเลี่ยม</span>
+                                    {% elif order.status == 'เสร็จสิ้น' %}
+                                        <span class="badge bg-primary px-2 py-1">เสร็จสิ้น</span>
+                                    {% elif order.status == 'รับพระแล้ว' %}
+                                        <span class="badge bg-success px-2 py-1">รับพระแล้ว</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary px-2 py-1">{{ order.status }}</span>
+                                    {% endif %}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between py-3">
+                                <span class="text-muted">วันที่ลูกค้ารับพระ:</span>
+                                <strong class="text-primary">
+                                    {% if order.pickup_date %}
+                                        {{ order.pickup_date.strftime('%d/%m/%Y') }}
+                                    {% else %}
+                                        - ยังไม่ได้รับพระ -
+                                    {% endif %}
+                                </strong>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
-            <!-- ข้อมูลทั่วไป -->
-            <ul class="list-group mb-4">
-                <li class="list-group-item"><strong>ชื่อลูกค้า:</strong> {{ order.customer_name }}</li>
-                <li class="list-group-item"><strong>เบอร์โทรศัพท์:</strong> {{ order.phone }}</li>
-                <li class="list-group-item"><strong>ลักษณะพระ / ชนิดพระ:</strong> {{ order.amulet_type }}</li>
-                <li class="list-group-item"><strong>วัสดุกรอบที่ต้องการ:</strong> {{ order.frame_material }}</li>
-                <li class="list-group-item"><strong>ราคาค่าเลี่ยม:</strong> {{ order.price }} บาท</li>
-                <li class="list-group-item"><strong>สถานะปัจจุบัน:</strong> <span class="badge bg-primary">{{ order.status }}</span></li>
-                <li class="list-group-item"><strong>วันที่รับงาน:</strong> {{ order.created_at }}</li>
-            </ul>
-
-            <!-- รูปภาพก่อนเลี่ยม -->
-            <h4 class="mb-3">📷 รูปถ่ายพระก่อนเลี่ยม</h4>
-            <div class="row mb-4">
-                {% if before_images %}
-                    {% for img in before_images %}
-                        <div class="col-md-3 mb-3">
-                            <div class="card h-100 shadow-sm">
-                                <a href="/static/uploads/{{ img }}" target="_blank">
-                                    <img src="/static/uploads/{{ img }}" class="card-img-top img-thumbnail" style="height: 200px; object-fit: cover;" alt="Before Image">
-                                </a>
+            <!-- Images & Update Form Card -->
+            <div class="col-md-7">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-secondary text-white py-3">
+                        <h5 class="mb-0"><i class="fa-solid fa-image me-2"></i> รูปภาพพระก่อนเลี่ยม</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if before_images %}
+                            <div class="row g-2">
+                                {% for img in before_images %}
+                                <div class="col-md-4 col-6">
+                                    <a href="/static/uploads/{{ img }}" target="_blank">
+                                        <img src="/static/uploads/{{ img }}" class="img-fluid rounded border shadow-sm" style="height: 150px; width: 100%; object-fit: cover;" alt="รูปก่อนเลี่ยม">
+                                    </a>
+                                </div>
+                                {% endfor %}
                             </div>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <p class="text-muted">ไม่มีรูปภาพก่อนเลี่ยม</p>
-                {% endif %}
-            </div>
+                        {% else %}
+                            <p class="text-muted text-center mb-0 py-3">ไม่มีรูปภาพก่อนเลี่ยม</p>
+                        {% endif %}
+                    </div>
+                </div>
 
-            <!-- รูปภาพหลังเลี่ยมเสร็จ -->
-            <h4 class="mb-3">✨ รูปถ่ายพระหลังเลี่ยมเสร็จ</h4>
-            <div class="row mb-3">
-                {% if after_images %}
-                    {% for img in after_images %}
-                        <div class="col-md-3 mb-3">
-                            <div class="card h-100 shadow-sm">
-                                <a href="/static/uploads/{{ img }}" target="_blank">
-                                    <img src="/static/uploads/{{ img }}" class="card-img-top img-thumbnail" style="height: 200px; object-fit: cover;" alt="After Image">
-                                </a>
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-success text-white py-3">
+                        <h5 class="mb-0"><i class="fa-solid fa-camera-retro me-2"></i> รูปภาพหลังเลี่ยมเสร็จ</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if after_images %}
+                            <div class="row g-2">
+                                {% for img in after_images %}
+                                <div class="col-md-4 col-6">
+                                    <a href="/static/uploads/{{ img }}" target="_blank">
+                                        <img src="/static/uploads/{{ img }}" class="img-fluid rounded border shadow-sm" style="height: 150px; width: 100%; object-fit: cover;" alt="รูปหลังเลี่ยม">
+                                    </a>
+                                </div>
+                                {% endfor %}
                             </div>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <p class="text-muted">ยังไม่มีรูปภาพหลังเลี่ยมเสร็จ (งานยังไม่เสร็จสิ้น)</p>
-                {% endif %}
+                        {% else %}
+                            <p class="text-muted text-center mb-0 py-3">ยังไม่มีการอัปโหลดรูปภาพหลังเลี่ยมเสร็จ</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Form for Uploading After Images and Updating Status & Date -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="mb-0"><i class="fa-solid fa-pen-to-square me-2"></i> จัดการสถานะ / อัปโหลดรูป / บันทึกวันมารับ</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/update-status/{{ order.id }}" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="status" class="form-label fw-semibold">เปลี่ยนสถานะงาน:</label>
+                                <select name="status" id="status" class="form-select shadow-sm" onchange="togglePickupDate(this.value)">
+                                    <option value="รอคิวเลี่ยม" {% if order.status == 'รอคิวเลี่ยม' %}selected{% endif %}>รอคิวเลี่ยม</option>
+                                    <option value="กำลังเลี่ยม" {% if order.status == 'กำลังเลี่ยม' %}selected{% endif %}>กำลังเลี่ยม</option>
+                                    <option value="เสร็จสิ้น" {% if order.status == 'เสร็จสิ้น' %}selected{% endif %}>เสร็จสิ้น</option>
+                                    <option value="รับพระแล้ว" {% if order.status == 'รับพระแล้ว' %}selected{% endif %}>รับพระแล้ว</option>
+                                </select>
+                            </div>
+
+                            <!-- ช่องเลือกวันที่รับพระ (ซ่อนไว้ถ้ายังไม่เลือกสถานะ "รับพระแล้ว" หรือสามารถเปิดให้กรอกอิสระได้) -->
+                            <div class="mb-3" id="pickup_date_container">
+                                <label for="pickup_date" class="form-label fw-semibold">วันที่ลูกค้ารับพระกลับ:</label>
+                                <input type="date" name="pickup_date" id="pickup_date" class="form-control shadow-sm" 
+                                       value="{% if order.pickup_date %}{{ order.pickup_date.strftime('%Y-%m-%d') }}{% endif %}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="after_images" class="form-label fw-semibold">เพิ่มรูปภาพหลังเลี่ยมเสร็จ (เลือกได้หลายรูป):</label>
+                                <input type="file" name="after_images" id="after_images" class="form-control shadow-sm" multiple accept="image/*">
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100 py-2 shadow-sm">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> บันทึกการเปลี่ยนแปลง
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Script ช่วยเลือกสถานะแล้วแนะนำ/เปิดช่องวันรับพระอัตโนมัติ -->
+    <script>
+        function togglePickupDate(status) {
+            const dateInput = document.getElementById('pickup_date');
+            if (status === 'รับพระแล้ว' && !dateInput.value) {
+                // ถ้าเปลี่ยนเป็น "รับพระแล้ว" และยังไม่ได้ใส่วันที่ ให้ใส่ใส่วันที่ปัจจุบันเป็นค่าเริ่มต้นให้อัตโนมัติ
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.value = today;
+            }
+        }
+    </script>
 </body>
 </html>
