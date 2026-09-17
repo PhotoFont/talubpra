@@ -123,12 +123,21 @@ def add_order(
     frame_material: str = Form(...),
     price: float = Form(...),
     remarks: Optional[str] = Form(None),  # รองรับรับค่าหมายเหตุตอนสร้างออเดอร์
+    order_date: Optional[str] = Form(None),  # รองรับการเลือกวันที่รับพระเข้ามา (เพิ่มข้อมูลย้อนหลังได้)
     before_images: List[UploadFile] = File([]),
     db: Session = Depends(database.get_db),
     auth_token: str = Cookie(None)
 ):
     if auth_token != "authenticated":
         return RedirectResponse(url="/login", status_code=303)
+
+    # จัดการวันที่รับพระ (ถ้าเลือกย้อนหลังมาให้ใช้ค่านั้น ถ้าไม่เลือกให้ใช้วันเวลาปัจจุบัน)
+    parsed_order_date = datetime.now()
+    if order_date:
+        try:
+            parsed_order_date = datetime.strptime(order_date, "%Y-%m-%d")
+        except ValueError:
+            pass
 
     # วนลูปผ่านฟังก์ชันย่อและบันทึกรูปภาพตอนรับงาน
     saved_filenames = []
@@ -148,7 +157,8 @@ def add_order(
         price=price,
         remarks=remarks,  # บันทึกหมายเหตุลงฐานข้อมูล
         before_image=images_string,
-        status="รอคิวเลี่ยม"
+        status="รอคิวเลี่ยม",
+        order_date=parsed_order_date  # บันทึกวันที่รับพระตามที่เลือก (หรือปัจจุบัน)
     )
     db.add(new_order)
     db.commit()

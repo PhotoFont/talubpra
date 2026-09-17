@@ -13,6 +13,11 @@
                 <h3 class="mb-4 text-center">🙏 บันทึกข้อมูลรับเลี่ยมพระ</h3>
                 <form action="/add" method="POST" enctype="multipart/form-data">
                     <div class="mb-3">
+                        <label for="order_date" class="form-label">วันที่รับพระเข้ามา</label>
+                        <!-- หากเว้นว่างไว้ ระบบจะใช้วันที่ปัจจุบัน แต่ถ้าคลิกเลือก สามารถเลือกวันย้อนหลังได้ -->
+                        <input type="date" class="form-control" id="order_date" name="order_date">
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">ชื่อลูกค้า</label>
                         <input type="text" name="customer_name" class="form-control" required>
                     </div>

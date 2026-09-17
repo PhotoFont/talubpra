@@ -7,8 +7,8 @@ class Order(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     customer_name = Column(String, index=True)
-    phone = Column(String)
-    amulet_type = Column(String)       # เช่น เหรียญ, รูปหล่อ, พระปิดตา
+    phone = Column(String, index=True)
+    amulet_type = Column(String)      # เช่น เหรียญ, รูปหล่อ, พระปิดตา
     frame_material = Column(String)    # เช่น ทองคำ, เงิน, ทองฝังเพชร
     price = Column(Float)
     status = Column(String, default="รอคิวเลี่ยม")  # รอคิว, กำลังเลี่ยม, เสร็จสิ้น, รับพระแล้ว
@@ -20,6 +20,11 @@ class Order(Base):
     before_image = Column(String, nullable=True)
     after_image = Column(String, nullable=True)
     
-    # ฟิลด์สำหรับเก็บบันทึกวันที่ลูกค้ารับพระกลับ และวันที่สร้างรายการ
+    # วันที่รับพระเข้ามา (สามารถเลือกวันที่ย้อนหลังได้ หากเว้นว่างจะใช้วันที่ปัจจุบัน)
+    order_date = Column(DateTime, default=datetime.now)
+    
+    # วันที่ลูกค้ารับพระกลับ
     pickup_date = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # วันเวลาที่สร้างรายการในระบบ
+    created_at = Column(DateTime, default=datetime.now)
