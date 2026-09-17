@@ -1,6 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import os
+
+# ตรวจสอบและสร้างโฟลเดอร์ data เสมอ ป้องกันปัญหาหาโฟลเดอร์ไม่เจอ
+os.makedirs("data", exist_ok=True)
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./data/talubpra.db"
 
