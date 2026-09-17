@@ -21,6 +21,16 @@
             </div>
         </div>
         
+        <!-- ฟอร์มช่องค้นหา -->
+        <form method="get" action="/" class="row g-3 mb-4">
+            <div class="col-md-10">
+                <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="ค้นหาด้วย ชื่อลูกค้า, เบอร์โทร, หรือประเภทพระ...">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">ค้นหา</button>
+            </div>
+        </form>
+
         <!-- Table Card Section -->
         <div class="card shadow-sm border-0">
             <div class="card-body table-responsive p-0">

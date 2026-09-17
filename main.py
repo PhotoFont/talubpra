@@ -20,7 +20,7 @@ templates = Jinja2Templates(directory="templates")
 
 UPLOAD_DIR = "static/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-os.makedirs("data", exist_ok=True) # ป้องกันปัญหาโฟลเดอร์ database หาย
+os.makedirs("data", exist_ok=True)  # ป้องกันปัญหาโฟลเดอร์ database หาย
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 ADMIN_PASSWORD = "21020166"
@@ -80,12 +80,32 @@ def logout():
 
 
 @app.get("/")
-def read_root(request: Request, auth_token: str = Cookie(None), db: Session = Depends(database.get_db)):
+def read_root(
+    request: Request, 
+    q: Optional[str] = None,  # รองรับรับค่าคำค้นหา
+    auth_token: str = Cookie(None), 
+    db: Session = Depends(database.get_db)
+):
     if auth_token != "authenticated":
         return RedirectResponse(url="/login", status_code=303)
         
-    orders = db.query(models.Order).order_by(models.Order.id.desc()).all()
-    return templates.TemplateResponse(request, "index.html", {"orders": orders})
+    query = db.query(models.Order)
+    
+    # หากมีการพิมพ์ค้นหา กรองจาก ชื่อลูกค้า, เบอร์โทรศัพท์ หรือประเภทพระ
+    if q:
+        search_filter = f"%{q}%"
+        query = query.filter(
+            (models.Order.customer_name.ilike(search_filter)) | 
+            (models.Order.phone.ilike(search_filter)) |
+            (models.Order.amulet_type.ilike(search_filter))
+        )
+        
+    orders = query.order_by(models.Order.id.desc()).all()
+    
+    return templates.TemplateResponse(request, "index.html", {
+        "orders": orders,
+        "q": q or ""  # ส่งค่าคำค้นหากลับไปแสดงที่ช่องค้นหา
+    })
 
 
 @app.get("/add")
@@ -102,7 +122,7 @@ def add_order(
     amulet_type: str = Form(...),
     frame_material: str = Form(...),
     price: float = Form(...),
-    remarks: Optional[str] = Form(None), # รองรับรับค่าหมายเหตุตอนสร้างออเดอร์
+    remarks: Optional[str] = Form(None),  # รองรับรับค่าหมายเหตุตอนสร้างออเดอร์
     before_images: List[UploadFile] = File([]),
     db: Session = Depends(database.get_db),
     auth_token: str = Cookie(None)
@@ -126,7 +146,7 @@ def add_order(
         amulet_type=amulet_type,
         frame_material=frame_material,
         price=price,
-        remarks=remarks, # บันทึกหมายเหตุลงฐานข้อมูล
+        remarks=remarks,  # บันทึกหมายเหตุลงฐานข้อมูล
         before_image=images_string,
         status="รอคิวเลี่ยม"
     )
@@ -164,7 +184,7 @@ def update_status(
     order_id: int, 
     status: str = Form(...), 
     pickup_date: Optional[str] = Form(None),
-    remarks: Optional[str] = Form(None), # รองรับรับค่าหมายเหตุตอนอัปเดตสถานะ
+    remarks: Optional[str] = Form(None),  # รองรับรับค่าหมายเหตุตอนอัปเดตสถานะ
     after_images: List[UploadFile] = File([]),
     db: Session = Depends(database.get_db),
     auth_token: str = Cookie(None)
@@ -175,7 +195,7 @@ def update_status(
     order = db.query(models.Order).filter(models.Order.id == order_id).first()
     if order:
         order.status = status
-        order.remarks = remarks # อัปเดตหมายเหตุ
+        order.remarks = remarks  # อัปเดตหมายเหตุ
         
         # จัดการบันทึกวันที่ลูกค้ารับพระกลับ
         if pickup_date:
